@@ -1,0 +1,48 @@
+.sample1{
+    background-color: #fac887;
+    color: black;
+    height: 50px;
+    border: solid 1px black;
+    border-radius: 5px;
+}
+
+.sample2{
+    background-color: #fa87db;
+    color: black;
+    height: 50px;
+    border: solid 1px black;
+    border-radius: 5px;
+}
+
+.sample3{
+    background-color: #87e7fa;
+    color: black;
+    height: 50px;
+    border: solid 1px black;
+    border-radius: 5px;
+}
+
+.sample4{
+    background-color: #e1fa87;
+    color: black;
+    height: 50px;
+    border: solid 1px black;
+    border-radius: 5px;
+}
+
+.sample5{   
+    color: black;
+    height: 50px;
+    border: solid 1px black;
+    border-radius: 5px;
+}
+
+div{
+    margin:10px;
+    color: rgb(2, 35, 96);
+}
+
+h1{
+    color:red
+}
+
