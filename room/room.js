@@ -65,7 +65,7 @@ scene.background = texture;
 
 //plane geometry for floor
 const plane = new THREE.Mesh(
-  new THREE.PlaneGeometry(100, 100, 10, 10),
+  new THREE.PlaneGeometry(200, 200, 20, 20),
   new THREE.MeshStandardMaterial({
     color: 0x40e0d0,
   }));
@@ -81,6 +81,7 @@ let modelReady = false;
 const animationActions = [];
 let activeAction;
 let lastAction;
+let character = null;
 const fbxLoader = new FBXLoader();
 
 
@@ -88,26 +89,26 @@ const fbxLoader = new FBXLoader();
 
 // Inside the FBXLoader callback, assign the loaded object to the 'character' variable
 fbxLoader.load(
-    'models/vanguard_t_choonyung.fbx',
-    (object) => {
-        object.scale.set(0.12, 0.12, 0.12);
-        object.position.y = 0.5;
-        mixer = new THREE.AnimationMixer(object);
+  'models/Remy.fbx',
+  (object) => {
+    object.scale.set(0.12, 0.12, 0.12);
+    object.position.y = 0.5;
+    mixer = new THREE.AnimationMixer(object);
 
-        const animationAction = mixer.clipAction(
-            object.animations[0]
-        );
-        animationActions.push(animationAction);
+    const animationAction = mixer.clipAction(
+      object.animations[0]
+    );
+    animationActions.push(animationAction);
 
-        activeAction = animationActions[0];
+    activeAction = animationActions[0];
 
-        scene.add(object);
+    scene.add(object);
 
-        // Assign the loaded object to the 'character' variable
-        character = object;
+    // Assign the loaded object to the 'character' variable
+    character = object;
 
     fbxLoader.load(
-      'models/vanguard@samba.fbx',
+      'models/samba.fbx',
       (object) => {
         console.log('loaded samba');
 
@@ -117,7 +118,7 @@ fbxLoader.load(
         animationActions.push(animationAction);
 
         fbxLoader.load(
-          'models/vanguard@bellydancing.fbx',
+          'models/bellydancing.fbx',
           (object) => {
             console.log('loaded bellydance');
 
@@ -127,7 +128,7 @@ fbxLoader.load(
             animationActions.push(animationAction);
 
             fbxLoader.load(
-              'models/vanguard@goofydancing.fbx',
+              'models/goofydancing.fbx',
               (object) => {
                 console.log('loaded goofydancing');
                 object.animations[0].tracks.shift();
@@ -137,7 +138,44 @@ fbxLoader.load(
                 );
                 animationActions.push(animationAction);
 
-                modelReady = true;
+                fbxLoader.load(
+                  'models/Walking.fbx',
+                  (object) => {
+                    console.log('loaded goofydancing');
+                    object.animations[0].tracks.shift();
+
+                    const animationAction = mixer.clipAction(
+                      object.animations[0]
+                    );
+                    animationActions.push(animationAction);
+                    fbxLoader.load(
+                      'models/Idle.fbx',
+                      (object) => {
+                        console.log('loaded goofydancing');
+
+                        const animationAction = mixer.clipAction(
+                          object.animations[0]
+                        );
+                        animationActions.push(animationAction);
+
+                        modelReady = true;
+                      },
+                      (xhr) => {
+                        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+                      },
+                      (error) => {
+                        console.log(error);
+                      }
+                    );
+                  },
+                  (xhr) => {
+                    animationAction.setDuration(5);
+                    console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+                  },
+                  (error) => {
+                    console.log(error);
+                  }
+                );
               },
               (xhr) => {
                 animationAction.setDuration(5);
@@ -174,46 +212,71 @@ fbxLoader.load(
 
 // Define variables for controlling the character's movement
 const moveSpeed = 1;
-let character = null;
 
 // Add event listener for key presses
 document.addEventListener('keydown', (event) => {
-    const keyCode = event.code;
+  const keyCode = event.code;
 
-    // Check which key was pressed
-    switch (keyCode) {
-        case 'KeyW':
-            moveCharacter('forward');
-            break;
-        case 'KeyS':
-            moveCharacter('backward');
-            break;
-        case 'KeyA':
-            moveCharacter('left');
-            break;
-        case 'KeyD':
-            moveCharacter('right');
-            break;
-    }
+  // Check which key was pressed
+  switch (keyCode) {
+    case 'KeyW':
+      moveCharacter('forward');
+      break;
+    case 'KeyS':
+      moveCharacter('backward');
+      break;
+    case 'KeyA':
+      moveCharacter('left');
+      break;
+    case 'KeyD':
+      moveCharacter('right');
+      break;
+  }
+
+
+
 });
 
 function moveCharacter(direction) {
-    if (!character) return; // Check if the character is loaded
+  if (!character) return; // Check if the character is loaded
 
-    switch (direction) {
-        case 'forward':
-            character.position.z -= moveSpeed;
-            break;
-        case 'backward':
-            character.position.z += moveSpeed;
-            break;
-        case 'left':
-            character.position.x -= moveSpeed;
-            break;
-        case 'right':
-            character.position.x += moveSpeed;
-            break;
-    }
+  let newPosition = new THREE.Vector3();
+  newPosition.copy(character.position); // Copy current character position
+
+  switch (direction) {
+    case 'forward':
+      setAction(animationActions[4]);
+      character.rotation.y = Math.PI;
+      newPosition.z -= moveSpeed;
+      break;
+    case 'backward':
+      setAction(animationActions[4]);
+      character.rotation.y = 0;
+      newPosition.z += moveSpeed;
+      break;
+    case 'left':
+      setAction(animationActions[4]);
+      character.rotation.y = -Math.PI / 2;
+      newPosition.x -= moveSpeed;
+      break;
+    case 'right':
+      setAction(animationActions[4]);
+      character.rotation.y = Math.PI / 2;
+      newPosition.x += moveSpeed;
+      break;
+  }
+
+
+  // Check if the new position is within the bounds of the plane
+  const planeBounds = plane.geometry.parameters;
+  if (
+    newPosition.x >= -(planeBounds.width / 2 - 5) &&
+    newPosition.x <= (planeBounds.width / 2 - 5) &&
+    newPosition.z >= -(planeBounds.height / 2 - 5) &&
+    newPosition.z <= (planeBounds.height / 2 - 5)
+  ) {
+    character.position.copy(newPosition);
+  }
 }
 
 
@@ -231,7 +294,7 @@ document.body.appendChild(stats.dom);
 
 const animations = {
   default: function () {
-    setAction(animationActions[0]);
+    setAction(animationActions[5]);
   },
   samba: function () {
     setAction(animationActions[1]);
@@ -242,6 +305,9 @@ const animations = {
   goofydancing: function () {
     setAction(animationActions[3]);
   },
+  walking: function () {
+    setAction(animationActions[4])
+  }
 };
 
 const setAction = (toAction) => {
@@ -263,14 +329,18 @@ animationsFolder.add(animations, 'default').name('Default Animation');
 animationsFolder.add(animations, 'samba').name('Samba Animation');
 animationsFolder.add(animations, 'bellydancing').name('Bellydance Animation');
 animationsFolder.add(animations, 'goofydancing').name('Goofy Running Animation');
+animationsFolder.add(animations, 'walking').name('Walking Animation')
 const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
-
+  camera.lookAt(scene.position);
+  
   controls.update();
 
-  if (modelReady) mixer.update(clock.getDelta());
+  if (modelReady) {
+    mixer.update(clock.getDelta());
+  }
 
   render();
 
