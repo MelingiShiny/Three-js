@@ -85,9 +85,6 @@ let character = null;
 const fbxLoader = new FBXLoader();
 
 
-// The rest of your code...
-
-// Inside the FBXLoader callback, assign the loaded object to the 'character' variable
 fbxLoader.load(
   'models/Remy.fbx',
   (object) => {
@@ -104,7 +101,6 @@ fbxLoader.load(
 
     scene.add(object);
 
-    // Assign the loaded object to the 'character' variable
     character = object;
 
     fbxLoader.load(
@@ -210,7 +206,6 @@ fbxLoader.load(
   }
 );
 
-// Define variables for controlling the character's movement
 const moveSpeed = 1;
 
 // Add event listener for key presses
@@ -233,8 +228,10 @@ document.addEventListener('keydown', (event) => {
       break;
   }
 
+});
 
-
+document.addEventListener('keyup', (event) => {
+  setAction(animationActions[5]);
 });
 
 function moveCharacter(direction) {
@@ -335,7 +332,7 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   camera.lookAt(scene.position);
-  
+
   controls.update();
 
   if (modelReady) {
