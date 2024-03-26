@@ -37,7 +37,8 @@ const camera = new THREE.PerspectiveCamera(
   1.0,
   1000
 );
-camera.position.set(0, 30, 100);
+const cameraOffset = new THREE.Vector3(0, 30, 100);
+
 
 //renderer
 const renderer = new THREE.WebGLRenderer();
@@ -65,7 +66,7 @@ scene.background = texture;
 
 //plane geometry for floor
 const plane = new THREE.Mesh(
-  new THREE.PlaneGeometry(200, 200, 20, 20),
+  new THREE.PlaneGeometry(500, 500, 50, 50),
   new THREE.MeshStandardMaterial({
     color: 0x40e0d0,
   }));
@@ -329,11 +330,22 @@ animationsFolder.add(animations, 'goofydancing').name('Goofy Running Animation')
 animationsFolder.add(animations, 'walking').name('Walking Animation')
 const clock = new THREE.Clock();
 
+
+// Update camera position to follow the character from behind
+function updateCameraPosition() {
+    if (character) {
+        camera.position.copy(character.position).add(cameraOffset);
+        camera.lookAt(character.position);
+    }
+}
+
 function animate() {
   requestAnimationFrame(animate);
   camera.lookAt(scene.position);
 
   controls.update();
+
+  updateCameraPosition();
 
   if (modelReady) {
     mixer.update(clock.getDelta());
